@@ -8,8 +8,8 @@ from app.suppliers.base import SupplierClient, effective_price
 
 _URL = "https://api.mouser.com/api/v1/search/partnumber"
 _TIMEOUT = 15.0
-_MAX_RETRIES = 2
-_RETRY_DELAYS = [0.5, 1.5]
+_MAX_RETRIES = 3
+_RETRY_DELAYS = [0.5, 1.0, 2.0]
 
 # Mouser free API allows ~10 req/s but bursts trigger 429 — cap at 3 concurrent
 _mouser_sem = asyncio.Semaphore(3)
@@ -25,15 +25,13 @@ class MouserClient(SupplierClient):
                 "partSearchOptions": "",
             }
         }
+        params = {"apiKey": settings.mouser_api_key}
+
         async with _mouser_sem:
             for attempt in range(_MAX_RETRIES):
                 try:
                     async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-                        resp = await client.post(
-                            _URL,
-                            params={"apiKey": settings.mouser_api_key},
-                            json=payload,
-                        )
+                        resp = await client.post(_URL, params=params, json=payload)
                     if resp.status_code == 429:
                         if attempt < _MAX_RETRIES - 1:
                             await asyncio.sleep(_RETRY_DELAYS[attempt])
@@ -47,13 +45,19 @@ class MouserClient(SupplierClient):
                         continue
                     return None
 
-                # Mouser sometimes returns 200 with Errors list instead of Parts
-                errors = data.get("Errors") or []
-                if errors:
+                if data.get("Errors"):
+                    # JSON-level errors (can be transient rate-limit variants) — retry
+                    if attempt < _MAX_RETRIES - 1:
+                        await asyncio.sleep(_RETRY_DELAYS[attempt])
+                        continue
                     return None
 
                 parts = (data.get("SearchResults") or {}).get("Parts") or []
                 if not parts:
+                    # Empty result can be a transient API glitch — retry once
+                    if attempt < _MAX_RETRIES - 1:
+                        await asyncio.sleep(_RETRY_DELAYS[attempt])
+                        continue
                     return None
 
                 price_breaks_raw = parts[0].get("PriceBreaks") or []
