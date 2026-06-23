@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BOM Price Tool</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <span class="logo">⚡ BOM Price Tool</span>
+      <span class="subtitle">Mouser · DigiKey · LCSC</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Step 1: Upload -->
+    <section id="step-upload" class="card">
+      <h2>1. Upload BOM File</h2>
+      <p class="hint">Accepts <strong>.csv</strong>, <strong>.xlsx</strong>, or <strong>.xls</strong>. Only Part Number and Quantity columns are required.</p>
+      <div id="drop-zone">
+        <div class="drop-icon">📂</div>
+        <p>Drag &amp; drop your BOM file here</p>
+        <p class="or">— or —</p>
+        <label for="file-input" class="btn btn-primary">Choose File</label>
+        <input type="file" id="file-input" accept=".csv,.xlsx,.xls" hidden />
+        <p id="file-name" class="file-name"></p>
+      </div>
+      <div id="upload-error" class="error-box" hidden></div>
+    </section>
+
+    <!-- Step 2: Progress -->
+    <section id="step-progress" class="card" hidden>
+      <h2>2. Looking Up Prices…</h2>
+      <p id="detected-cols" class="detected-cols"></p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <p id="progress-text" class="progress-text">0 / 0 parts processed</p>
+    </section>
+
+    <!-- Step 3: Results -->
+    <section id="step-results" class="card" hidden>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h2 style="margin-bottom:0;">3. Results</h2>
+        <button id="btn-reset-top" class="btn btn-primary">Choose File</button>
+      </div>
+      <div class="summary-bar">
+        <div class="summary-item">
+          <span class="summary-label">Grand Total (USD)</span>
+          <span class="summary-value" id="total-usd">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Grand Total (VND)</span>
+          <span class="summary-value" id="total-vnd">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Exchange Rate</span>
+          <span class="summary-value" id="exchange-rate">—</span>
+        </div>
+      </div>
+
+      <div id="not-found-box" class="warning-box" hidden>
+        <strong>⚠ Parts not found on any supplier:</strong>
+        <ul id="not-found-list"></ul>
+      </div>
+
+      <div class="legend">
+        <span class="legend-item green">■ Found (multiple suppliers)</span>
+        <span class="legend-item yellow">■ Found (1 supplier only)</span>
+        <span class="legend-item red">■ Not found</span>
+        <span class="legend-item gray">■ No Part Number</span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th>Part Number</th>
+              <th>Qty</th>
+              <th>Best Supplier</th>
+              <th>Unit Price (USD)</th>
+              <th>Unit Price (VND)</th>
+              <th>Total Line (USD)</th>
+              <th>Mouser</th>
+              <th>DigiKey</th>
+              <th>LCSC</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+      <p class="preview-note" id="preview-note"></p>
+
+      <div class="download-row">
+        <button id="btn-download" class="btn btn-success">⬇ Download Full Excel</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Internal tool — do not share API keys · Prices are indicative and subject to availability</p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
