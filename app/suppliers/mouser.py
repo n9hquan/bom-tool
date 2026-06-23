@@ -11,8 +11,8 @@ _TIMEOUT = 15.0
 _MAX_RETRIES = 3
 _RETRY_DELAYS = [1.0, 2.0, 4.0]
 
-# Mouser free API triggers 429 on bursts — force serial requests with a throttle delay
-_mouser_sem = asyncio.Semaphore(1)
+# Mouser free API allows ~10 req/s but bursts trigger 429 — cap at 3 concurrent
+_mouser_sem = asyncio.Semaphore(3)
 
 
 class MouserClient(SupplierClient):
@@ -26,7 +26,6 @@ class MouserClient(SupplierClient):
             }
         }
         async with _mouser_sem:
-            await asyncio.sleep(0.4)  # throttle: max ~2 req/s to Mouser
             for attempt in range(_MAX_RETRIES):
                 try:
                     async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
