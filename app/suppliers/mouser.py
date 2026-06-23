@@ -47,20 +47,13 @@ class MouserClient(SupplierClient):
                         continue
                     return None
 
-                # JSON-level errors can be transient — retry
+                # Mouser sometimes returns 200 with Errors list instead of Parts
                 errors = data.get("Errors") or []
                 if errors:
-                    if attempt < _MAX_RETRIES - 1:
-                        await asyncio.sleep(_RETRY_DELAYS[attempt])
-                        continue
                     return None
 
                 parts = (data.get("SearchResults") or {}).get("Parts") or []
                 if not parts:
-                    # Empty result can be a transient API glitch — retry
-                    if attempt < _MAX_RETRIES - 1:
-                        await asyncio.sleep(_RETRY_DELAYS[attempt])
-                        continue
                     return None
 
                 price_breaks_raw = parts[0].get("PriceBreaks") or []
@@ -71,9 +64,7 @@ class MouserClient(SupplierClient):
                 for pb in price_breaks_raw:
                     try:
                         min_qty = int(pb["Quantity"])
-                        price = float(
-                            str(pb["Price"]).replace(",", "").replace("$", "").strip()
-                        )
+                        price = float(str(pb["Price"]).replace(",", "").replace("$", "").strip())
                         breaks.append((min_qty, price))
                     except (KeyError, ValueError, TypeError):
                         continue
@@ -82,8 +73,6 @@ class MouserClient(SupplierClient):
                     return None
 
                 unit_price = effective_price(breaks, qty)
-                return SupplierResult(
-                    supplier="Mouser", unit_price_usd=unit_price, qty_break=qty
-                )
+                return SupplierResult(supplier="Mouser", unit_price_usd=unit_price, qty_break=qty)
 
         return None
