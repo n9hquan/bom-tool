@@ -26,7 +26,6 @@ const notFoundList = document.getElementById('not-found-list');
 const resultsBody  = document.getElementById('results-body');
 const previewNote  = document.getElementById('preview-note');
 const btnDownload  = document.getElementById('btn-download');
-const btnResetTop  = document.getElementById('btn-reset-top');
 
 // ── Upload / drag-drop ────────────────────────────────────────────────────
 // Skip fileInput.click() when clicking the <label> — the label already triggers it natively
@@ -177,9 +176,6 @@ function renderResults(data) {
 btnDownload.addEventListener('click', () => {
   window.location.href = `/api/download/${currentJobId}`;
 });
-
-// ── Choose File (from results screen) ────────────────────────────────────
-btnResetTop.addEventListener('click', () => fileInput.click());
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 function show(el) { el.hidden = false; }
