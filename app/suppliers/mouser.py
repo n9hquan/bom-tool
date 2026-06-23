@@ -8,8 +8,8 @@ from app.suppliers.base import SupplierClient, effective_price
 
 _URL = "https://api.mouser.com/api/v1/search/partnumber"
 _TIMEOUT = 15.0
-_MAX_RETRIES = 3
-_RETRY_DELAYS = [1.0, 2.0, 4.0]
+_MAX_RETRIES = 2
+_RETRY_DELAYS = [0.5, 1.5]
 
 # Mouser free API allows ~10 req/s but bursts trigger 429 — cap at 3 concurrent
 _mouser_sem = asyncio.Semaphore(3)
