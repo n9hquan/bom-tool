@@ -12,10 +12,6 @@ An internal web tool for looking up component prices from multiple suppliers. Up
 - **Handles incomplete BOMs**: Rows without a part number are preserved in output (gray rows) rather than dropped
 - **Excel export**: Full results with color-coded rows (green = multiple suppliers, yellow = single supplier, red = not found, gray = no part number)
 
-## Demo
-
-![BOM Price Tool screenshot](https://github.com/n9hquan/bom-tool/raw/master/screenshot.png)
-
 ## Tech Stack
 
 | Layer | Technology |
